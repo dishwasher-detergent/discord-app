@@ -1,0 +1,26 @@
+{
+  "name": "discord-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && node dist/main.js",
+    "format": "prettier --write .",
+    "setup": "node dist/register-commands.js"
+  },  "dependencies": {
+    "discord-interactions": "^4.3.0",
+    "@hono/node-server": "^1.14.1",
+    "hono": "^4.7.7",
+    "node-appwrite": "^16.0.0",
+    "node-fetch": "^2.7.0",
+    "xml2js": "^0.6.2"
+  },  "devDependencies": {
+    "@types/node-fetch": "^2.6.12",
+    "@types/node": "^22.15.21",
+    "@types/xml2js": "^0.4.14",
+    "prettier": "^3.2.5",
+    "typescript": "^5.7.2"
+  }
+}
