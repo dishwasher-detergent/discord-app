@@ -30,6 +30,9 @@ export default async (context: Context) => {
     'DISCORD_APPLICATION_ID',
     'DISCORD_TOKEN',
     'DISCORD_PUBLIC_KEY',
+    'API_KEY',
+    'DATABASE_ID',
+    'REMINDER_COLLECTION_ID',
   ]);
 
   const request = requestFromContext(context);

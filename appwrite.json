@@ -3,17 +3,18 @@
     "projectName": "discord-app",
     "settings": {
         "services": {
-            "account": true,
-            "avatars": true,
+            "account": false,
+            "avatars": false,
             "databases": true,
-            "locale": true,
-            "health": true,
-            "storage": true,
-            "teams": true,
-            "users": true,
+            "locale": false,
+            "health": false,
+            "storage": false,
+            "teams": false,
+            "users": false,
+            "sites": true,
             "functions": true,
             "graphql": true,
-            "messaging": true
+            "messaging": false
         },
         "auth": {
             "methods": {
@@ -55,6 +56,74 @@
             "entrypoint": "dist/main.js",
             "commands": "npm install && npm run build && npm run setup",
             "path": "functions/app"
+        }
+    ],
+    "databases": [
+        {
+            "$id": "database",
+            "name": "database",
+            "enabled": true
+        }
+    ],
+    "collections": [
+        {
+            "$id": "reminder",
+            "$permissions": [],
+            "databaseId": "database",
+            "name": "reminder",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "userId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "guildId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "channelId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "targetMessageId",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "reminderTimeInput",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                },
+                {
+                    "key": "status",
+                    "type": "string",
+                    "required": true,
+                    "array": false,
+                    "size": 128,
+                    "default": null
+                }
+            ],
+            "indexes": []
         }
     ]
 }

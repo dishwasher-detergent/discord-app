@@ -5,7 +5,14 @@ import {
 } from 'discord-interactions';
 import { Hono } from 'hono';
 
-import { DISCORD_PUBLIC_KEY } from '../lib/constants.js';
+import {
+  handleCancelReminderCommand,
+  handleCancelReminderSelect,
+} from '../lib/cancelReminderHandlers.js';
+import { DISCORD_PUBLIC_KEY, EPHEMERAL_FLAG } from '../lib/constants.js';
+import { handleCreateReminderCommand } from '../lib/createReminderHandler.js';
+import { handleListRemindersCommand } from '../lib/listRemindersHandler.js';
+import { handleReminderModalSubmit } from './reminderHandlers.js';
 
 export function Interactions(app: Hono) {
   app.post('/interactions', async (c) => {
@@ -30,24 +37,63 @@ export function Interactions(app: Hono) {
     }
 
     const interaction = JSON.parse(rawBody);
+
+    if (interaction.type === InteractionType.PING) {
+      return c.json({ type: InteractionResponseType.PONG });
+    }
+
     if (interaction.type === InteractionType.APPLICATION_COMMAND) {
       const { name } = interaction.data;
+      const userId = interaction.member?.user?.id || interaction.user?.id;
 
-      if (name === 'hello') {
+      switch (name) {
+        case 'create':
+          return handleCreateReminderCommand(interaction, c);
+        case 'list':
+          return handleListRemindersCommand(userId, c);
+        case 'cancel':
+          return handleCancelReminderCommand(interaction, c);
+        default:
+          console.warn('Unhandled application command name:', name);
+          return c.json({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: "Sorry, I don't know how to handle that command.",
+              flags: EPHEMERAL_FLAG,
+            },
+          });
+      }
+    } else if (interaction.type === InteractionType.MODAL_SUBMIT) {
+      const customId = interaction.data.custom_id;
+      if (customId.startsWith('reminder_modal:')) {
+        return handleReminderModalSubmit(interaction, c);
+      } else {
+        console.warn('Unhandled modal custom_id:', customId);
         return c.json({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: 'Hello, Discord world!',
+            content: "Sorry, I don't know how to handle that action.",
+            flags: EPHEMERAL_FLAG,
           },
         });
       }
-
-      return c.json(
-        {
-          type: InteractionResponseType.PONG,
-        },
-        200
-      );
+    } else if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
+      const customId = interaction.data.custom_id;
+      if (customId === 'cancel_reminder_select') {
+        return handleCancelReminderSelect(interaction, c);
+      } else {
+        console.warn('Unhandled message component custom_id:', customId);
+        return c.json({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: {
+            content: "Sorry, I don't know how to handle that action.",
+            flags: EPHEMERAL_FLAG,
+          },
+        });
+      }
     }
+
+    console.warn('Unhandled interaction type:', interaction.type);
+    return c.json({ type: InteractionResponseType.PONG });
   });
 }
