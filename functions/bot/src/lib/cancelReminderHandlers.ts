@@ -5,14 +5,14 @@ import {
 import { Query } from 'node-appwrite';
 
 import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
-import { EPHEMERAL_FLAG } from './constants.js';
+import { EPHEMERAL_FLAG, MAX_REMINDERS_PER_USER } from './constants.js';
 
 async function listRemindersForCancellation(userId: string) {
   return await database.listDocuments(DATABASE_ID, REMINDER_COLLECTION_ID, [
     Query.equal('userId', userId),
     Query.equal('status', 'pending'),
     Query.orderDesc('$createdAt'),
-    Query.limit(25),
+    Query.limit(MAX_REMINDERS_PER_USER),
   ]);
 }
 

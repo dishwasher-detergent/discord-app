@@ -55,6 +55,34 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
     });
   }
 
+  const match = reminderTimeInput.match(timeRegex);
+  if (match) {
+    const value = parseInt(match[1], 10);
+    const unit = match[2].toLowerCase();
+    let durationInMilliseconds = 0;
+
+    if (unit === 'm') {
+      durationInMilliseconds = value * 60 * 1000;
+    } else if (unit === 'h') {
+      durationInMilliseconds = value * 60 * 60 * 1000;
+    } else if (unit === 'd') {
+      durationInMilliseconds = value * 24 * 60 * 60 * 1000;
+    }
+
+    const thirtyDaysInMilliseconds = 30 * 24 * 60 * 60 * 1000;
+
+    if (durationInMilliseconds > thirtyDaysInMilliseconds) {
+      return c.json({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content:
+            'Sorry, the maximum reminder time is 30 days. Please enter a shorter duration.',
+          flags: EPHEMERAL_FLAG,
+        },
+      });
+    }
+  }
+
   if (!userId) {
     console.error('User ID not found in modal submission');
     return c.json({
