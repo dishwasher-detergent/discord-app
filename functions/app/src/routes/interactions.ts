@@ -10,9 +10,11 @@ import {
   handleCancelReminderSelect,
 } from '../lib/cancelReminderHandlers.js';
 import { DISCORD_PUBLIC_KEY, EPHEMERAL_FLAG } from '../lib/constants.js';
-import { handleCreateReminderCommand } from '../lib/createReminderHandler.js';
+import {
+  handleCreateReminderCommand,
+  handleReminderModalSubmit,
+} from '../lib/createReminderHandler.js';
 import { handleListRemindersCommand } from '../lib/listRemindersHandler.js';
-import { handleReminderModalSubmit } from './reminderHandlers.js';
 
 export function Interactions(app: Hono) {
   app.post('/interactions', async (c) => {
