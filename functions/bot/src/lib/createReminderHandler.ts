@@ -3,6 +3,7 @@ import { ID, Query } from 'node-appwrite';
 
 import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
 import { EPHEMERAL_FLAG } from './constants.js';
+import { calculateReminderTime } from './utils.js';
 
 export async function handleCreateReminderCommand(interaction: any, c: any) {
   const targetMessageId = interaction.data.target_id;
@@ -87,7 +88,7 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
       });
     }
 
-    await database.createDocument(
+    let res = await database.createDocument(
       DATABASE_ID,
       REMINDER_COLLECTION_ID,
       ID.unique(),
@@ -101,10 +102,16 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
       }
     );
 
+    let remainderTime = calculateReminderTime(
+      reminderTimeInput,
+      new Date(res.$createdAt)
+    );
+    const remainderTimestamp = Math.floor(remainderTime.getTime() / 1000);
+
     return c.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: `Okay, I'll remind you about that message! (Time: ${reminderTimeInput})`,
+        content: `Okay, I'll remind you about that message at <t:${remainderTimestamp}:f>`,
         flags: EPHEMERAL_FLAG,
       },
     });
