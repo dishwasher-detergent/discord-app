@@ -2,7 +2,7 @@ import { InteractionResponseType } from 'discord-interactions';
 import { ID, Query } from 'node-appwrite';
 
 import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
-import { EPHEMERAL_FLAG } from './constants.js';
+import { EPHEMERAL_FLAG, MAX_REMINDERS_PER_USER } from './constants.js';
 import { calculateReminderTime } from './utils.js';
 
 export async function handleCreateReminderCommand(interaction: any, c: any) {
@@ -73,16 +73,15 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
       [
         Query.equal('userId', userId),
         Query.equal('status', 'pending'),
-        Query.limit(25),
+        Query.limit(MAX_REMINDERS_PER_USER),
       ]
     );
 
-    if (existingReminders.total >= 25) {
+    if (existingReminders.total >= MAX_REMINDERS_PER_USER) {
       return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content:
-            "⚠️ You've reached the maximum limit of 25 pending reminders. Please cancel some old ones before adding new ones.",
+          content: `⚠️ You've reached the maximum limit of ${MAX_REMINDERS_PER_USER} pending reminders. Please cancel some old ones before adding new ones.`,
           flags: EPHEMERAL_FLAG,
         },
       });
@@ -111,7 +110,7 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
     return c.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: `Okay, I'll remind you about that message at <t:${remainderTimestamp}:f>`,
+        content: `Okay, I'll remind you about that message <t:${remainderTimestamp}:f>`,
         flags: EPHEMERAL_FLAG,
       },
     });

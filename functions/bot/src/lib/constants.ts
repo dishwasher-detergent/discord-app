@@ -8,3 +8,5 @@ export const DISCORD_API_BASE_URL = `${DISCORD_API_URL}/applications/${DISCORD_A
 export const APPWRITE_SITEMAP_URL = 'https://appwrite.io/docs/sitemap.xml';
 
 export const EPHEMERAL_FLAG = 64;
+
+export const MAX_REMINDERS_PER_USER = 25;
