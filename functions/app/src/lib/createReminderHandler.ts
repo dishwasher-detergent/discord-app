@@ -40,7 +40,7 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
   const guildId = interaction.guild_id;
   const channelId = interaction.channel_id;
 
-  const timeRegex = /^(\\d+)([mhd])$/i;
+  const timeRegex = /^(\d+)([mhd])$/i;
   const isValidFormat = timeRegex.test(reminderTimeInput);
 
   if (!isValidFormat) {
