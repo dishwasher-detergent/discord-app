@@ -1,12 +1,18 @@
 import { InteractionResponseType } from 'discord-interactions';
 import { Query } from 'node-appwrite';
 
-import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
-import { EPHEMERAL_FLAG } from './constants.js';
+import { Context } from 'hono';
+import { Reminder } from '../interfaces/reminder.interface.js';
+import {
+  database,
+  DATABASE_ID,
+  REMINDER_COLLECTION_ID,
+} from '../lib/appwrite.js';
+import { EPHEMERAL_FLAG } from '../lib/constants.js';
 
 export async function handleListRemindersCommand(
   userId: string | undefined,
-  c: any,
+  c: Context,
   statusOption?: string
 ) {
   if (!userId) {
@@ -21,7 +27,7 @@ export async function handleListRemindersCommand(
   try {
     const statusToQuery = statusOption || 'pending';
 
-    const response = await database.listDocuments(
+    const response = await database.listDocuments<Reminder>(
       DATABASE_ID,
       REMINDER_COLLECTION_ID,
       [
@@ -42,7 +48,7 @@ export async function handleListRemindersCommand(
     }
 
     let content = `**🗓️ Your ${statusToQuery} Reminders:** \n\n`;
-    response.documents.forEach((doc: any) => {
+    response.documents.forEach((doc) => {
       let messageContext = `[View original message](<https://discord.com/channels/${doc.guildId}/${doc.channelId}/${doc.targetMessageId}>)`;
       const reminderTimestamp = Math.floor(
         new Date(doc.reminderDateTime).getTime() / 1000

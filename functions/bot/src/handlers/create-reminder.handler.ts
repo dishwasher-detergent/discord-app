@@ -1,11 +1,20 @@
 import { InteractionResponseType } from 'discord-interactions';
 import { ID, Query } from 'node-appwrite';
 
-import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
-import { EPHEMERAL_FLAG, MAX_REMINDERS_PER_USER } from './constants.js';
-import { calculateReminderTime } from './utils.js';
+import { Context } from 'hono';
+import { Reminder } from '../interfaces/reminder.interface.js';
+import {
+  database,
+  DATABASE_ID,
+  REMINDER_COLLECTION_ID,
+} from '../lib/appwrite.js';
+import { EPHEMERAL_FLAG, MAX_REMINDERS_PER_USER } from '../lib/constants.js';
+import { calculateReminderTime } from '../lib/utils.js';
 
-export async function handleCreateReminderCommand(interaction: any, c: any) {
+export async function handleCreateReminderCommand(
+  interaction: any,
+  c: Context
+) {
   const targetMessageId = interaction.data.target_id;
   return c.json({
     type: InteractionResponseType.MODAL,
@@ -32,7 +41,7 @@ export async function handleCreateReminderCommand(interaction: any, c: any) {
   });
 }
 
-export async function handleReminderModalSubmit(interaction: any, c: any) {
+export async function handleReminderModalSubmit(interaction: any, c: Context) {
   const customId = interaction.data.custom_id;
   const targetMessageId = customId.split(':')[1];
   const reminderTimeInput =
@@ -95,7 +104,7 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
   }
 
   try {
-    const existingReminders = await database.listDocuments(
+    const existingReminders = await database.listDocuments<Reminder>(
       DATABASE_ID,
       REMINDER_COLLECTION_ID,
       [
@@ -148,10 +157,7 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
     });
   } catch (error) {
     console.error('Failed to save reminder to Appwrite:', error);
-    const appwriteError = error as any;
-    if (appwriteError.response) {
-      console.error('Appwrite error response:', appwriteError.response);
-    }
+
     return c.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {

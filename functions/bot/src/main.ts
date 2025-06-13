@@ -6,7 +6,7 @@ import {
   responseForContext,
   throwIfMissing,
 } from './lib/utils.js';
-import { Interactions } from './routes/interactions.js';
+import { Interactions } from './routes/interactions.route.js';
 
 export interface Context {
   req: any;

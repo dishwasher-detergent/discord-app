@@ -4,19 +4,29 @@ import {
 } from 'discord-interactions';
 import { Query } from 'node-appwrite';
 
-import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
-import { EPHEMERAL_FLAG, MAX_REMINDERS_PER_USER } from './constants.js';
+import { Context } from 'hono';
+import { Reminder } from '../interfaces/reminder.interface.js';
+import {
+  database,
+  DATABASE_ID,
+  REMINDER_COLLECTION_ID,
+} from '../lib/appwrite.js';
+import { EPHEMERAL_FLAG, MAX_REMINDERS_PER_USER } from '../lib/constants.js';
 
 async function listRemindersForCancellation(userId: string) {
-  return await database.listDocuments(DATABASE_ID, REMINDER_COLLECTION_ID, [
-    Query.equal('userId', userId),
-    Query.equal('status', 'pending'),
-    Query.orderDesc('$createdAt'),
-    Query.limit(MAX_REMINDERS_PER_USER),
-  ]);
+  return await database.listDocuments<Reminder>(
+    DATABASE_ID,
+    REMINDER_COLLECTION_ID,
+    [
+      Query.equal('userId', userId),
+      Query.equal('status', 'pending'),
+      Query.orderDesc('$createdAt'),
+      Query.limit(MAX_REMINDERS_PER_USER),
+    ]
+  );
 }
 
-function formatReminderOption(doc: any) {
+function formatReminderOption(doc: Reminder) {
   const docId = doc.$id;
   const reminderTime = doc.reminderTimeInput || 'N/A';
 
@@ -59,7 +69,10 @@ function formatReminderOption(doc: any) {
   };
 }
 
-export async function handleCancelReminderCommand(interaction: any, c: any) {
+export async function handleCancelReminderCommand(
+  interaction: any,
+  c: Context
+) {
   const userId = interaction.member?.user?.id || interaction.user?.id;
 
   if (!userId) {
@@ -162,7 +175,7 @@ export async function handleCancelReminderSelect(interaction: any, c: any) {
   }
 
   try {
-    const reminder = await database.getDocument(
+    const reminder = await database.getDocument<Reminder>(
       DATABASE_ID,
       REMINDER_COLLECTION_ID,
       reminderId

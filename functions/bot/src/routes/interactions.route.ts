@@ -8,13 +8,13 @@ import { Hono } from 'hono';
 import {
   handleCancelReminderCommand,
   handleCancelReminderSelect,
-} from '../lib/cancelReminderHandlers.js';
-import { DISCORD_PUBLIC_KEY, EPHEMERAL_FLAG } from '../lib/constants.js';
+} from '../handlers/cancel-reminder.handler.js';
 import {
   handleCreateReminderCommand,
   handleReminderModalSubmit,
-} from '../lib/createReminderHandler.js';
-import { handleListRemindersCommand } from '../lib/listRemindersHandler.js';
+} from '../handlers/create-reminder.handler.js';
+import { handleListRemindersCommand } from '../handlers/list-reminders.handler.js';
+import { DISCORD_PUBLIC_KEY, EPHEMERAL_FLAG } from '../lib/constants.js';
 
 export function Interactions(app: Hono) {
   app.post('/interactions', async (c) => {
