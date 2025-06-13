@@ -56,6 +56,24 @@
             "entrypoint": "dist/main.js",
             "commands": "npm install && npm run build && npm run setup",
             "path": "functions/app"
+        },
+        {
+            "$id": "remind",
+            "name": "remind",
+            "runtime": "node-22",
+            "specification": "s-0.5vcpu-512mb",
+            "execute": [],
+            "events": [],
+            "scopes": [
+                "users.read"
+            ],
+            "schedule": "* * * * *",
+            "timeout": 15,
+            "enabled": true,
+            "logging": true,
+            "entrypoint": "dist/main.js",
+            "commands": "npm install && npm run build",
+            "path": "functions/remind"
         }
     ],
     "databases": [
