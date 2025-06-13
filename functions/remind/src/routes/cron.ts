@@ -5,7 +5,7 @@ import {
   DATABASE_ID,
   REMINDER_COLLECTION_ID,
 } from '../lib/appwrite.js';
-import { calculateReminderTime, sendDiscordMessage } from '../lib/utils.js';
+import { sendDiscordMessage } from '../lib/utils.js';
 
 export interface Reminder extends Models.Document {
   userId: string;
@@ -23,10 +23,37 @@ export function Cron(app: Hono) {
       console.log('Cron job started');
 
       const now = new Date();
+      const startOfMinute = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        0,
+        0
+      );
+      const endOfMinute = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes(),
+        59,
+        999
+      );
+
       const pendingReminders = await database.listDocuments<Reminder>(
         DATABASE_ID,
         REMINDER_COLLECTION_ID,
-        [Query.equal('status', 'pending'), Query.limit(5000)]
+        [
+          Query.equal('status', 'pending'),
+          Query.between(
+            'reminderDateTime',
+            startOfMinute.toISOString(),
+            endOfMinute.toISOString()
+          ),
+          Query.limit(5000),
+        ]
       );
 
       if (pendingReminders.total === 0) {
@@ -34,28 +61,15 @@ export function Cron(app: Hono) {
         return c.json({ message: 'No pending reminders.' }, 200);
       }
 
-      const dueReminders: Reminder[] = [];
-      for (const reminder of pendingReminders.documents) {
-        const reminderTime = calculateReminderTime(
-          reminder.reminderTimeInput,
-          new Date(reminder.$createdAt)
-        );
-        if (now >= reminderTime) {
-          dueReminders.push(reminder);
-        }
-      }
-
-      if (dueReminders.length === 0) {
-        console.log('No reminders currently due for processing.');
-        return c.json({ message: 'No reminders currently due.' }, 200);
-      }
-
       let successfullyProcessed = 0;
       let failedToProcess = 0;
 
-      for (const reminder of dueReminders) {
+      for (const reminder of pendingReminders.documents) {
         try {
-          const message = `Hey <@${reminder.userId}>, here's your reminder! [View original message](<https://discord.com/channels/${reminder.guildId}/${reminder.channelId}/${reminder.targetMessageId}>)`;
+          const reminderTimestamp = Math.floor(
+            new Date(reminder.reminderDateTime).getTime() / 1000
+          );
+          const message = `Hey <@${reminder.userId}>, here's your reminder set for <t:${reminderTimestamp}:f>! [View original message](<https://discord.com/channels/${reminder.guildId}/${reminder.channelId}/${reminder.targetMessageId}>)`;
           await sendDiscordMessage(reminder.userId, message);
 
           await database.updateDocument(
@@ -96,7 +110,7 @@ export function Cron(app: Hono) {
           message: 'Cron job execution finished.',
           processed: successfullyProcessed,
           failed: failedToProcess,
-          totalDue: dueReminders.length,
+          totalDue: pendingReminders.total,
         },
         200
       );

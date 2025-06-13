@@ -115,6 +115,11 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
       });
     }
 
+    const reminderDateTime = calculateReminderTime(
+      reminderTimeInput,
+      new Date()
+    ).toISOString();
+
     let res = await database.createDocument(
       DATABASE_ID,
       REMINDER_COLLECTION_ID,
@@ -125,20 +130,19 @@ export async function handleReminderModalSubmit(interaction: any, c: any) {
         channelId,
         targetMessageId,
         reminderTimeInput,
+        reminderDateTime,
         status: 'pending',
       }
     );
 
-    let remainderTime = calculateReminderTime(
-      reminderTimeInput,
-      new Date(res.$createdAt)
+    const remainderTimestamp = Math.floor(
+      new Date(res.reminderDateTime).getTime() / 1000
     );
-    const remainderTimestamp = Math.floor(remainderTime.getTime() / 1000);
 
     return c.json({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: `Okay, I'll remind you about that message <t:${remainderTimestamp}:f>`,
+        content: `Okay, I'll remind you about that message at <t:${remainderTimestamp}:f>`,
         flags: EPHEMERAL_FLAG,
       },
     });

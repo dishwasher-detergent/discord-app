@@ -3,7 +3,6 @@ import { Query } from 'node-appwrite';
 
 import { database, DATABASE_ID, REMINDER_COLLECTION_ID } from './appwrite.js';
 import { EPHEMERAL_FLAG } from './constants.js';
-import { calculateReminderTime } from './utils.js';
 
 export async function handleListRemindersCommand(
   userId: string | undefined,
@@ -45,12 +44,8 @@ export async function handleListRemindersCommand(
     let content = `**🗓️ Your ${statusToQuery} Reminders:** \n\n`;
     response.documents.forEach((doc: any) => {
       let messageContext = `[View original message](<https://discord.com/channels/${doc.guildId}/${doc.channelId}/${doc.targetMessageId}>)`;
-      const reminderTime = calculateReminderTime(
-        doc.reminderTimeInput,
-        new Date(doc.$createdAt)
-      );
       const reminderTimestamp = Math.floor(
-        new Date(reminderTime).getTime() / 1000
+        new Date(doc.reminderDateTime).getTime() / 1000
       );
       content += `- Reminding at <t:${reminderTimestamp}:f> - ${messageContext} \n`;
     });

@@ -23,6 +23,10 @@ app.onError((err, c) => {
   return c.json(err, 500);
 });
 
+app.get('/', (c) => {
+  return c.text('Hello again!');
+});
+
 Interactions(app);
 
 export default async (context: Context) => {
