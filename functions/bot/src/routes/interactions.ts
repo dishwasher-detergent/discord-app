@@ -18,27 +18,56 @@ import { handleListRemindersCommand } from '../lib/listRemindersHandler.js';
 
 export function Interactions(app: Hono) {
   app.post('/interactions', async (c) => {
+    if (!DISCORD_PUBLIC_KEY) {
+      console.error('DISCORD_PUBLIC_KEY is not configured');
+      return c.json({ error: 'Server configuration error' }, 500);
+    }
+
     const signature = c.req.header('x-signature-ed25519');
     const timestamp = c.req.header('x-signature-timestamp');
 
     if (!signature || !timestamp) {
-      return c.json({ error: 'Invalid request signature' }, 401);
+      console.warn('Missing signature headers', {
+        signature: !!signature,
+        timestamp: !!timestamp,
+      });
+      return c.json({ error: 'Bad request signature' }, 401);
     }
 
     const rawBody = await c.req.text();
 
-    const isValidRequest = verifyKey(
-      rawBody,
-      signature,
-      timestamp,
-      DISCORD_PUBLIC_KEY
-    );
-
-    if (!isValidRequest) {
-      return c.json({ error: 'Invalid signature' }, 401);
+    if (!rawBody) {
+      console.warn('Empty request body');
+      return c.json({ error: 'Bad request signature' }, 401);
     }
 
-    const interaction = JSON.parse(rawBody);
+    let isValidRequest: boolean;
+
+    try {
+      isValidRequest = await verifyKey(
+        rawBody,
+        signature,
+        timestamp,
+        DISCORD_PUBLIC_KEY
+      );
+    } catch (error) {
+      console.error('Signature verification error:', error);
+      return c.json({ error: 'Bad request signature' }, 401);
+    }
+
+    if (!isValidRequest) {
+      console.warn('Invalid Discord signature');
+      return c.json({ error: 'Bad request signature' }, 401);
+    }
+
+    let interaction;
+
+    try {
+      interaction = JSON.parse(rawBody);
+    } catch (error) {
+      console.error('Failed to parse interaction JSON:', error);
+      return c.json({ error: 'Bad request signature' }, 401);
+    }
 
     if (interaction.type === InteractionType.PING) {
       return c.json({ type: InteractionResponseType.PONG });
