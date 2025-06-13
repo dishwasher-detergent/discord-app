@@ -38,13 +38,13 @@ export async function handleListRemindersCommand(
       });
     }
 
-    let content = '**🗓️ Your Pending Reminders:**\\n\\n';
+    let content = '**🗓️ Your Pending Reminders:**\n\n';
     response.documents.forEach((doc: any) => {
       let messageContext = `[View original message](<https://discord.com/channels/${doc.guildId}/${doc.channelId}/${doc.targetMessageId}>)`;
       const createdAtTimestamp = Math.floor(
         new Date(doc.$createdAt).getTime() / 1000
       );
-      content += `- Remind \`${doc.reminderTimeInput}\` after <t:${createdAtTimestamp}:f> - ${messageContext}\\n`;
+      content += `- Remind \`${doc.reminderTimeInput}\` after <t:${createdAtTimestamp}:f> - ${messageContext}\n`;
     });
 
     if (content.length > 2000) {
