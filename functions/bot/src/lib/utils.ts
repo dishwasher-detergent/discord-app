@@ -80,3 +80,38 @@ export function arrayBufferToBase64(arrayBuffer: ArrayBuffer) {
   bytes.forEach((byte) => (binary += String.fromCharCode(byte)));
   return btoa(binary);
 }
+
+/**
+ * Calculates the actual reminder time based on input string and creation date.
+ * @param reminderTimeInput - e.g., \"30m\", \"2h\", \"1d\"
+ * @param createdAt - The date the reminder was created.
+ * @returns The Date object representing the reminder time.
+ */
+export function calculateReminderTime(
+  reminderTimeInput: string,
+  createdAt: Date
+): Date {
+  const match = reminderTimeInput.match(/^(\d+)([mhd])$/i);
+  if (!match) {
+    throw new Error('Invalid reminder time format');
+  }
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+  const reminderTime = new Date(createdAt);
+
+  switch (unit) {
+    case 'm':
+      reminderTime.setMinutes(reminderTime.getMinutes() + value);
+      break;
+    case 'h':
+      reminderTime.setHours(reminderTime.getHours() + value);
+      break;
+    case 'd':
+      reminderTime.setDate(reminderTime.getDate() + value);
+      break;
+    default:
+      throw new Error('Invalid time unit');
+  }
+  return reminderTime;
+}

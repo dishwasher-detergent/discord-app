@@ -40,8 +40,8 @@
     },
     "functions": [
         {
-            "$id": "6830c69d003db55dfe99",
-            "name": "app",
+            "$id": "discord-bot",
+            "name": "discord-bot",
             "runtime": "node-22",
             "specification": "s-0.5vcpu-512mb",
             "execute": [
@@ -55,7 +55,7 @@
             "logging": true,
             "entrypoint": "dist/main.js",
             "commands": "npm install && npm run build && npm run setup",
-            "path": "functions/app"
+            "path": "functions/bot"
         },
         {
             "$id": "remind",
