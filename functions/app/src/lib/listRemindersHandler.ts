@@ -6,7 +6,8 @@ import { EPHEMERAL_FLAG } from './constants.js';
 
 export async function handleListRemindersCommand(
   userId: string | undefined,
-  c: any
+  c: any,
+  statusOption?: string
 ) {
   if (!userId) {
     return c.json({
@@ -18,12 +19,14 @@ export async function handleListRemindersCommand(
     });
   }
   try {
+    const statusToQuery = statusOption || 'pending';
+
     const response = await database.listDocuments(
       DATABASE_ID,
       REMINDER_COLLECTION_ID,
       [
         Query.equal('userId', userId),
-        Query.equal('status', 'pending'),
+        Query.equal('status', statusToQuery),
         Query.orderDesc('$createdAt'),
       ]
     );
@@ -32,19 +35,19 @@ export async function handleListRemindersCommand(
       return c.json({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: '✨ You have no pending reminders! ✨',
+          content: `✨ You have no ${statusToQuery} reminders! ✨`,
           flags: EPHEMERAL_FLAG,
         },
       });
     }
 
-    let content = '**🗓️ Your Pending Reminders:**\n\n';
+    let content = `**🗓️ Your ${statusToQuery} Reminders:** \n\n`;
     response.documents.forEach((doc: any) => {
       let messageContext = `[View original message](<https://discord.com/channels/${doc.guildId}/${doc.channelId}/${doc.targetMessageId}>)`;
       const createdAtTimestamp = Math.floor(
         new Date(doc.$createdAt).getTime() / 1000
       );
-      content += `- Remind \`${doc.reminderTimeInput}\` after <t:${createdAtTimestamp}:f> - ${messageContext}\n`;
+      content += `- Remind \`${doc.reminderTimeInput}\` after <t:${createdAtTimestamp}:f> - ${messageContext} \n`;
     });
 
     if (content.length > 2000) {

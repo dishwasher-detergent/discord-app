@@ -52,7 +52,10 @@ export function Interactions(app: Hono) {
         case 'create':
           return handleCreateReminderCommand(interaction, c);
         case 'list':
-          return handleListRemindersCommand(userId, c);
+          const statusOption = interaction.data.options?.find(
+            (option: any) => option.name === 'status'
+          )?.value;
+          return handleListRemindersCommand(userId, c, statusOption);
         case 'cancel':
           return handleCancelReminderCommand(interaction, c);
         default:

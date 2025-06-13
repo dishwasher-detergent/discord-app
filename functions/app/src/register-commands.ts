@@ -19,8 +19,34 @@ const commands: Command[] = [
   },
   {
     name: 'list',
-    description: 'Lists your pending reminders',
+    description: 'Lists your reminders, optionally filtering by status.',
     type: 1,
+    options: [
+      {
+        name: 'status',
+        description: 'Filter reminders by status (default: pending)',
+        type: 3,
+        required: false,
+        choices: [
+          {
+            name: 'Pending',
+            value: 'pending',
+          },
+          {
+            name: 'Completed',
+            value: 'complete',
+          },
+          {
+            name: 'Cancelled',
+            value: 'cancelled',
+          },
+          {
+            name: 'Failed',
+            value: 'failed',
+          },
+        ],
+      },
+    ],
   },
   {
     name: 'cancel',
