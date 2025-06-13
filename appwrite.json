@@ -139,6 +139,14 @@
                     "array": false,
                     "size": 128,
                     "default": null
+                },
+                {
+                    "key": "reminderDateTime",
+                    "type": "datetime",
+                    "required": true,
+                    "array": false,
+                    "format": "",
+                    "default": null
                 }
             ],
             "indexes": []
